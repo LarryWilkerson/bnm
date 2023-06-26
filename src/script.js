@@ -83,16 +83,16 @@ let model_1, model_2, model_3;
  * Bloom
  */
 
-const params = {  // Need help for each parameter.. :)
-    threshold: 0.5,
-    strength: 2,
-    radius: 0.5,
+const params = {
+    threshold: 2,
+    strength: 3,
+    radius: 1,
     exposure: 1,
 };
 
 const renderScene = new RenderPass(scene, camera);
 
-const bloomPass = new UnrealBloomPass(  // Need help for each parameter.. :)
+const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
     1.5,
     0.4,
@@ -102,7 +102,12 @@ bloomPass.threshold = params.threshold;
 bloomPass.strength = params.strength;
 bloomPass.radius = params.radius;
 
-const bloomComposer = new EffectComposer(renderer);
+const target = new THREE.WebGLRenderTarget(1024, 1024, {
+    type: THREE.HalfFloatType,
+    format: THREE.RGBAFormat,
+  })
+
+const bloomComposer = new EffectComposer(renderer, target);
 bloomComposer.renderToScreen = true;
 bloomComposer.addPass(renderScene);
 bloomComposer.addPass(bloomPass);
@@ -121,11 +126,14 @@ gltfLoader.setDRACOLoader(dracoLoader);
 // Load main model
 gltfLoader.load("/models/1.glb", (gltf) => {
     model_1 = gltf.scene;
-    // model_1.traverse((child) => {
-    //     console.log(child);
-    //     if (child.name == "Sphere_2") {
-    //     }
-    // });
+    model_1.traverse((child) => {
+        if (child.name == "Sphere_3") {
+            console.log(child.material);
+            child.material.toneMapped = false;
+            child.material.emissive.set("green");
+            child.material.emissiveIntensity = 1000;
+        }
+    });
     scene.add(model_1);
 });
 gltfLoader.load("/models/2.glb", (gltf) => {
@@ -138,7 +146,6 @@ gltfLoader.load("/models/3.glb", (gltf) => {
     model_3.position.y = -1;
     scene.add(model_3);
 });
-
 
 /**
  * Action
